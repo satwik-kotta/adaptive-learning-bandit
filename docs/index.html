@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adaptive Learning Bandit</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f4f3f0;--surface:#fcfcfb;--border:#e2e0da;--text:#0b0b0b;--text2:#52514e;--muted:#85837c;--grid:#e9e7e1;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;--h0:#cde2fb;--h1:#3987e5;--h2:#0d366b;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#111110;--surface:#1a1a19;--border:#30302d;--text:#ffffff;--text2:#c3c2b7;--muted:#8d8c84;--grid:#2a2a28;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300;--h0:#0d366b;--h1:#3987e5;--h2:#cde2fb;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:28px 16px 56px}
+h1{font-size:26px;margin:0 0 4px;letter-spacing:-.01em}
+h2{font-size:16px;margin:0 0 2px}
+p.sub{margin:0 0 14px;color:var(--text2);font-size:13.5px}
+.lede{color:var(--text2);max-width:800px;margin:0 0 22px}
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(4,1fr);margin-bottom:14px}
+.two{grid-template-columns:1fr 1fr;margin-bottom:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;min-width:0}
+.block{margin-bottom:14px}
+.kpi .label{font-size:12.5px;color:var(--text2)}
+.kpi .value{font-size:28px;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .note{font-size:12.5px;color:var(--muted)}
+.chart{width:100%;height:330px}
+.chart.tall{height:420px}
+.callout{border-left:3px solid var(--s2);padding:2px 0 2px 12px;margin:10px 0 0;color:var(--text2);font-size:13.5px}
+.warn{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--s4);border-radius:8px;padding:10px 14px;margin:0 0 14px;font-size:13.5px;color:var(--text2)}
+footer{margin-top:22px;color:var(--muted);font-size:12.5px}
+@media (max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Adaptive Learning Bandit</h1>
+  <p class="lede">A tutor that picks each student's next maths question with a multi-armed bandit, compared with a fixed textbook sequence. The tutor sees only right and wrong answers; it has to infer what the student is ready for.</p>
+  <p class="warn"><b>Simulated students.</b> Every result here comes from a simulator with stated assumptions about how people learn. It shows how the policies behave under those assumptions, not how real students would respond.</p>
+
+  <div class="grid kpis" id="kpis"></div>
+
+  <div class="card block">
+    <h2>Average mastery as questions are answered</h2>
+    <p class="sub" id="curveSub"></p>
+    <div class="chart" id="curves"></div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h2>Who benefits</h2>
+      <p class="sub">Final mastery by how quickly the student learns. No policy is told a student's learning speed.</p>
+      <div class="chart" id="speed"></div>
+    </div>
+    <div class="card">
+      <h2>Are questions pitched at the right level?</h2>
+      <p class="sub">One slow-learning student. Question difficulty minus the student's true mastery of that topic, 10-question rolling average. The shaded band is where a question teaches most.</p>
+      <div class="chart" id="pitch"></div>
+    </div>
+  </div>
+
+  <div class="card block">
+    <h2>Where each policy spends its questions</h2>
+    <p class="sub">Share of questions on each topic, in blocks of 20. The textbook moves on by the clock; the bandit moves on when the student does.</p>
+    <div class="grid two" style="margin:0"><div class="chart" id="spendA" style="height:260px"></div><div class="chart" id="spendB" style="height:260px"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Does the result survive different assumptions?</h2>
+    <p class="sub">Bandit minus textbook, final mastery, when one simulator assumption is changed. Bars are 95% intervals; settings were tuned once on the baseline and not re-tuned.</p>
+    <div class="chart tall" id="sweep"></div>
+    <p class="callout" id="sweepNote"></p>
+  </div>
+
+  <footer>Mastery runs from 0 to 1 and is the average across six topics. Bandit design follows Clement et al. (2015). Method and limits: see the repository README.</footer>
+</main>
+
+<script src="vendor/echarts.min.js"></script>
+<script src="data.js"></script>
+<script>
+const D = window.TUTOR_DATA, css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const charts = {}, T = Object.fromEntries(D.table.map(r => [r.policy, r]));
+const LIN = 'Linear curriculum', BAN = 'Learning-progress bandit', ORA = 'Oracle (sees mastery)';
+const ORDER = [BAN, LIN, ORA, 'Staircase rule', 'Thompson sampling (target difficulty)', 'Random questions'];
+const SHORT = { [LIN]: 'Textbook sequence', [BAN]: 'Bandit', [ORA]: 'Oracle (upper bound)', 'Staircase rule': 'Staircase rule', 'Thompson sampling (target difficulty)': 'Thompson sampling', 'Random questions': 'Random' };
+const color = i => css('--s' + (i + 1)), DASH = ['solid', 'dashed', 'dotted', 'solid', 'dashed', 'dotted'];
+const f2 = x => x.toFixed(2), pts = x => (x >= 0 ? '+' : '') + (100 * x).toFixed(1);
+
+function base() {
+  return { textStyle: { color: css('--text2'), fontFamily: 'system-ui' }, animation: false,
+    tooltip: { backgroundColor: css('--surface'), borderColor: css('--border'), textStyle: { color: css('--text'), fontSize: 13 } } };
+}
+const axis = extra => Object.assign({ axisLine: { lineStyle: { color: css('--border') } }, axisTick: { show: false },
+  axisLabel: { color: css('--text2') }, splitLine: { lineStyle: { color: css('--grid') } } }, extra);
+const legend = () => ({ top: 0, left: 0, textStyle: { color: css('--text2') }, itemWidth: 16, itemHeight: 10 });
+
+function kpis() {
+  const b = T[BAN], l = T[LIN], o = T[ORA];
+  const items = [
+    ['Final mastery, bandit', f2(b.final_mastery), `Textbook sequence ${f2(l.final_mastery)}; students start at ${f2(D.start_mastery)}`],
+    ['Bandit advantage', pts(b.vs_linear) + ' pts', `95% CI ${pts(b.vs_linear_ci[0])} to ${pts(b.vs_linear_ci[1])}, ${D.students.toLocaleString()} students`],
+    ['Students who do better', Math.round(100 * b.share_of_students_better_than_linear) + '%', 'with the bandit than with the textbook sequence'],
+    ['Gap to the upper bound closed', Math.round(100 * b.vs_linear / o.vs_linear) + '%', `An oracle that sees mastery reaches ${f2(o.final_mastery)}`],
+  ];
+  document.getElementById('kpis').innerHTML = items.map(([l, v, n]) =>
+    `<div class="card kpi"><div class="label">${l}</div><div class="value">${v}</div><div class="note">${n}</div></div>`).join('');
+  document.getElementById('curveSub').textContent = `Mean true mastery across ${D.students.toLocaleString()} simulated students over ${D.horizon} questions. Each student is identical across policies.`;
+}
+
+function curves() {
+  charts.curves.setOption(Object.assign(base(), {
+    grid: { left: 46, right: 18, top: 54, bottom: 40 }, legend: legend(),
+    tooltip: Object.assign(base().tooltip, { trigger: 'axis', formatter: p => `<b>After ${p[0].dataIndex} questions</b><br>` + p.slice().sort((a, b) => b.value - a.value).map(s => `${s.seriesName}: ${f2(s.value)}`).join('<br>') }),
+    xAxis: axis({ type: 'category', data: T[LIN].curve.map((_, i) => i), boundaryGap: false, splitLine: { show: false }, name: 'Questions answered', nameLocation: 'middle', nameGap: 26, nameTextStyle: { color: css('--text2') }, axisLabel: { color: css('--text2'), interval: 29 } }),
+    yAxis: axis({ type: 'value', min: 0, max: 0.7 }),
+    series: ORDER.map((k, i) => ({ name: SHORT[k], type: 'line', data: T[k].curve, showSymbol: false, lineStyle: { width: i < 2 ? 2.5 : 1.5, color: color(i), type: DASH[i] }, itemStyle: { color: color(i) } })) }), true);
+}
+
+function speed() {
+  const keys = [BAN, LIN, ORA];
+  charts.speed.setOption(Object.assign(base(), {
+    grid: { left: 46, right: 18, top: 34, bottom: 30 }, legend: legend(),
+    tooltip: Object.assign(base().tooltip, { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: p => `<b>${p[0].name}</b><br>` + p.map(s => `${s.seriesName}: ${f2(s.value)}`).join('<br>') }),
+    xAxis: axis({ type: 'category', data: D.segments, splitLine: { show: false }, axisLabel: { color: css('--text2'), interval: 0 } }),
+    yAxis: axis({ type: 'value', min: 0, max: 0.9 }),
+    series: keys.map((k, i) => ({ name: SHORT[k], type: 'bar', barGap: '8%', data: T[k].by_speed.map(v => +v.toFixed(3)), itemStyle: { color: color(i), borderRadius: [4, 4, 0, 0], borderColor: css('--surface'), borderWidth: 1 },
+      label: { show: i < 2, position: 'top', color: css('--text'), fontSize: 11, formatter: p => f2(p.value) } })) }), true);
+}
+
+function pitch() {
+  const roll = name => { const s = D.example.traces[name].steps.map(r => D.levels[r[1]] - r[3]); return s.map((_, i) => { const w = s.slice(Math.max(0, i - 9), i + 1); return +(w.reduce((a, b) => a + b, 0) / w.length).toFixed(3); }); };
+  const mk = (k, i) => ({ name: SHORT[k], type: 'line', data: roll(k), showSymbol: false, lineStyle: { width: 2, color: color(i), type: DASH[i] }, itemStyle: { color: color(i) } });
+  const s = [mk(BAN, 0), mk(LIN, 1)];
+  s[0].markArea = { silent: true, itemStyle: { color: css('--s3'), opacity: .14 }, data: [[{ yAxis: 0 }, { yAxis: 0.2 }]] };
+  charts.pitch.setOption(Object.assign(base(), {
+    grid: { left: 50, right: 18, top: 34, bottom: 40 }, legend: legend(),
+    tooltip: Object.assign(base().tooltip, { trigger: 'axis', formatter: p => `<b>Question ${p[0].dataIndex + 1}</b><br>` + p.map(s => `${s.seriesName}: ${s.value > 0 ? '+' : ''}${s.value} (${s.value > 0.2 ? 'too hard' : s.value < 0 ? 'too easy' : 'well pitched'})`).join('<br>') }),
+    xAxis: axis({ type: 'category', data: D.example.traces[LIN].steps.map((_, i) => i + 1), boundaryGap: false, splitLine: { show: false }, name: 'Question number', nameLocation: 'middle', nameGap: 26, nameTextStyle: { color: css('--text2') }, axisLabel: { color: css('--text2'), interval: 29 } }),
+    yAxis: axis({ type: 'value', axisLabel: { color: css('--text2'), formatter: v => (v > 0 ? '+' : '') + v.toFixed(1) } }),
+    series: s }), true);
+}
+
+function spend(id, name) {
+  const M = D.spend[name], data = [], rows = D.topics.slice().reverse();
+  M.forEach((row, k) => row.forEach((v, b) => data.push([b, D.topics.length - 1 - k, +(100 * v).toFixed(0)])));
+  charts[id].setOption(Object.assign(base(), {
+    title: { text: SHORT[name], left: 0, top: 0, textStyle: { color: css('--text'), fontSize: 13, fontWeight: 600 } },
+    grid: { left: 120, right: 10, top: 30, bottom: 44 },
+    tooltip: Object.assign(base().tooltip, { formatter: p => `<b>${rows[p.value[1]]}</b><br>Questions ${p.value[0] * 20 + 1}–${p.value[0] * 20 + 20}: ${p.value[2]}% of questions` }),
+    xAxis: axis({ type: 'category', data: M[0].map((_, b) => `${b * 20 + 1}`), splitLine: { show: false }, name: 'Question number (start of block)', nameLocation: 'middle', nameGap: 26, nameTextStyle: { color: css('--text2') } }),
+    yAxis: axis({ type: 'category', data: rows, splitLine: { show: false }, axisLabel: { color: css('--text') } }),
+    visualMap: { show: false, min: 0, max: 100, inRange: { color: [css('--surface'), css('--h1'), css('--h2')] } },
+    series: [{ type: 'heatmap', data, itemStyle: { borderColor: css('--surface'), borderWidth: 2 }, label: { show: true, fontSize: 10, color: css('--text'), formatter: p => p.value[2] >= 10 ? p.value[2] : '' } }] }), true);
+}
+
+function sweep() {
+  const S = D.sweep.slice().reverse();
+  charts.sweep.setOption(Object.assign(base(), {
+    grid: { left: 270, right: 30, top: 10, bottom: 44 },
+    tooltip: Object.assign(base().tooltip, { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: p => { const r = S[p[0].dataIndex];
+      return `<b>${r.world}</b><br>Bandit ${f2(r.bandit)}, textbook ${f2(r.linear)}<br>Difference ${pts(r.diff)} pts (95% CI ${pts(r.ci[0])} to ${pts(r.ci[1])})`; } }),
+    xAxis: axis({ type: 'value', name: 'Bandit minus textbook, mastery points', nameLocation: 'middle', nameGap: 28, nameTextStyle: { color: css('--text2') }, axisLabel: { color: css('--text2'), formatter: v => (v > 0 ? '+' : '') + v } }),
+    yAxis: axis({ type: 'category', data: S.map(r => r.world), splitLine: { show: false }, axisLabel: { color: css('--text') } }),
+    series: [
+      { type: 'custom', silent: true, data: S.map((r, i) => [100 * r.ci[0], 100 * r.ci[1], i]), renderItem: (params, api) => { const a = api.coord([api.value(0), api.value(2)]), b = api.coord([api.value(1), api.value(2)]);
+        return { type: 'line', shape: { x1: a[0], y1: a[1], x2: b[0], y2: b[1] }, style: { stroke: css('--text2'), lineWidth: 2 } }; } },
+      { type: 'scatter', symbolSize: 12, data: S.map(r => ({ value: +(100 * r.diff).toFixed(1), itemStyle: { color: r.diff >= 0 ? css('--s1') : css('--s2') }, symbol: r.diff >= 0 ? 'circle' : 'diamond' })),
+        label: { show: true, position: 'top', distance: 4, fontSize: 11, color: css('--text'), formatter: p => (p.value > 0 ? '+' : '') + p.value },
+        markLine: { silent: true, symbol: 'none', lineStyle: { color: css('--muted'), width: 1 }, label: { show: false }, data: [{ xAxis: 0 }] } }
+    ] }), true);
+  const win = D.sweep.filter(r => r.ci[0] > 0).length, lose = D.sweep.filter(r => r.ci[1] < 0).map(r => r.world.toLowerCase());
+  document.getElementById('sweepNote').textContent = `The bandit is ahead in ${win} of ${D.sweep.length} settings. It falls behind when time is plentiful or students learn fast (${lose.join('; ')}): given enough questions a fixed sequence gets everyone through, and the bandit's exploration becomes a cost.`;
+}
+
+function draw() { curves(); speed(); pitch(); spend('spendA', LIN); spend('spendB', BAN); sweep(); }
+['curves', 'speed', 'pitch', 'spendA', 'spendB', 'sweep'].forEach(id => charts[id] = echarts.init(document.getElementById(id)));
+kpis(); draw();
+addEventListener('resize', () => Object.values(charts).forEach(c => c.resize()));
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+</script>
+</body>
+</html>
