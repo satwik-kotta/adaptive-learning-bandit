@@ -1,0 +1,476 @@
+{
+ "students": 2000,
+ "horizon": 180,
+ "start_mastery": 0.09015873981095902,
+ "topics": [
+  "Fractions",
+  "Decimals",
+  "Ratios",
+  "Percentages",
+  "Linear equations",
+  "Inequalities"
+ ],
+ "levels": [
+  0.1,
+  0.3,
+  0.5,
+  0.7,
+  0.9
+ ],
+ "segments": [
+  "Slowest third of learners",
+  "Middle third",
+  "Fastest third"
+ ],
+ "table": [
+  {
+   "policy": "Linear curriculum",
+   "final_mastery": 0.43315660047899684,
+   "final_ci": [
+    0.4209956850424408,
+    0.4448761866315966
+   ],
+   "gain": 0.3429978606680378,
+   "post_test": 0.49618333333333325,
+   "post_test_ci": [
+    0.48776624999999996,
+    0.5048008333333333
+   ],
+   "vs_linear": 0.0,
+   "vs_linear_ci": [
+    0.0,
+    0.0
+   ],
+   "share_of_students_better_than_linear": 0.0,
+   "post_test_vs_linear": 0.0,
+   "post_test_vs_linear_ci": [
+    0.0,
+    0.0
+   ],
+   "topics_above_half": 2.9345,
+   "by_topic": [
+    0.622,
+    0.528,
+    0.442,
+    0.373,
+    0.33,
+    0.305
+   ],
+   "by_speed": [
+    0.16688635337601532,
+    0.35721599549296773,
+    0.7752535985875185
+   ]
+  },
+  {
+   "policy": "Random questions",
+   "final_mastery": 0.1536605124725986,
+   "final_ci": [
+    0.1512481327978919,
+    0.15606983150359108
+   ],
+   "gain": 0.06350177266163959,
+   "post_test": 0.3029,
+   "post_test_ci": [
+    0.29958208333333325,
+    0.3063504166666666
+   ],
+   "vs_linear": -0.2794960880063982,
+   "vs_linear_ci": [
+    -0.2898307326085318,
+    -0.2684963791273152
+   ],
+   "share_of_students_better_than_linear": 0.004,
+   "post_test_vs_linear": -0.1932833333333333,
+   "post_test_vs_linear_ci": [
+    -0.20105166666666666,
+    -0.18508333333333335
+   ],
+   "topics_above_half": 0.4725,
+   "by_topic": [
+    0.485,
+    0.22,
+    0.098,
+    0.055,
+    0.037,
+    0.027
+   ],
+   "by_speed": [
+    0.12295296135530978,
+    0.14883664382300701,
+    0.1891847000525981
+   ]
+  },
+  {
+   "policy": "Staircase rule",
+   "final_mastery": 0.34270069552287075,
+   "final_ci": [
+    0.3386362388866317,
+    0.3465344851787131
+   ],
+   "gain": 0.25254195571191174,
+   "post_test": 0.4372,
+   "post_test_ci": [
+    0.4332654166666666,
+    0.44135041666666663
+   ],
+   "vs_linear": -0.09045590495612603,
+   "vs_linear_ci": [
+    -0.09926035864991554,
+    -0.08161569588747608
+   ],
+   "share_of_students_better_than_linear": 0.514,
+   "post_test_vs_linear": -0.058983333333333325,
+   "post_test_vs_linear_ci": [
+    -0.06543375,
+    -0.0524825
+   ],
+   "topics_above_half": 2.478,
+   "by_topic": [
+    0.668,
+    0.633,
+    0.613,
+    0.094,
+    0.029,
+    0.02
+   ],
+   "by_speed": [
+    0.2578016617630852,
+    0.3405186949352299,
+    0.4297784585050983
+   ]
+  },
+  {
+   "policy": "Thompson sampling (target difficulty)",
+   "final_mastery": 0.3193169445100835,
+   "final_ci": [
+    0.31664890871978474,
+    0.32203417724989836
+   ],
+   "gain": 0.2291582046991245,
+   "post_test": 0.4169666666666667,
+   "post_test_ci": [
+    0.4133995833333333,
+    0.42051666666666665
+   ],
+   "vs_linear": -0.11383965596891325,
+   "vs_linear_ci": [
+    -0.12351484534867606,
+    -0.10380402027450977
+   ],
+   "share_of_students_better_than_linear": 0.4885,
+   "post_test_vs_linear": -0.07921666666666667,
+   "post_test_vs_linear_ci": [
+    -0.08643416666666666,
+    -0.07191666666666666
+   ],
+   "topics_above_half": 1.94,
+   "by_topic": [
+    0.869,
+    0.643,
+    0.293,
+    0.063,
+    0.027,
+    0.019
+   ],
+   "by_speed": [
+    0.2632065952492228,
+    0.318375506301607,
+    0.3763673205278339
+   ]
+  },
+  {
+   "policy": "Learning-progress bandit",
+   "final_mastery": 0.47881929320385247,
+   "final_ci": [
+    0.4708563864922915,
+    0.48634781676529243
+   ],
+   "gain": 0.3886605533928934,
+   "post_test": 0.5237999999999999,
+   "post_test_ci": [
+    0.5178495833333333,
+    0.5297166666666667
+   ],
+   "vs_linear": 0.045662692724855646,
+   "vs_linear_ci": [
+    0.03971291543954351,
+    0.051641907529119346
+   ],
+   "share_of_students_better_than_linear": 0.625,
+   "post_test_vs_linear": 0.027616666666666664,
+   "post_test_vs_linear_ci": [
+    0.022749999999999992,
+    0.03225124999999999
+   ],
+   "topics_above_half": 3.1925,
+   "by_topic": [
+    0.784,
+    0.735,
+    0.613,
+    0.429,
+    0.226,
+    0.087
+   ],
+   "by_speed": [
+    0.3030901367258464,
+    0.46450918704290306,
+    0.6688371014107825
+   ]
+  },
+  {
+   "policy": "Oracle (sees mastery)",
+   "final_mastery": 0.6090278107008223,
+   "final_ci": [
+    0.6019037269486966,
+    0.6158584570188819
+   ],
+   "gain": 0.5188690708898633,
+   "post_test": 0.6171499999999999,
+   "post_test_ci": [
+    0.6116991666666666,
+    0.6226504166666665
+   ],
+   "vs_linear": 0.1758712102218255,
+   "vs_linear_ci": [
+    0.17018917131641678,
+    0.18147354349550252
+   ],
+   "share_of_students_better_than_linear": 0.859,
+   "post_test_vs_linear": 0.12096666666666667,
+   "post_test_vs_linear_ci": [
+    0.11624916666666667,
+    0.12556708333333333
+   ],
+   "topics_above_half": 4.9045,
+   "by_topic": [
+    0.75,
+    0.714,
+    0.693,
+    0.635,
+    0.505,
+    0.356
+   ],
+   "by_speed": [
+    0.44210841956967756,
+    0.5950673922458574,
+    0.7898866901243311
+   ]
+  }
+ ],
+ "sweep": [
+  {
+   "world": "Baseline world",
+   "change": {},
+   "linear": 0.4308391289400722,
+   "bandit": 0.4781884816407134,
+   "diff": 0.047349352700641306,
+   "ci": [
+    0.036531047067108,
+    0.05865570506226201
+   ]
+  },
+  {
+   "world": "Learning less forgiving of poor pitch",
+   "change": {
+    "width": 0.1
+   },
+   "linear": 0.2942936583119188,
+   "bandit": 0.3810909660053007,
+   "diff": 0.08679730769338194,
+   "ci": [
+    0.07579751398721238,
+    0.0977104302032716
+   ]
+  },
+  {
+   "world": "Learning more forgiving of poor pitch",
+   "change": {
+    "width": 0.22
+   },
+   "linear": 0.5200890140171032,
+   "bandit": 0.5393692839077272,
+   "diff": 0.019280269890624053,
+   "ci": [
+    0.009310181083336056,
+    0.029699752225385363
+   ]
+  },
+  {
+   "world": "Slow learners",
+   "change": {
+    "lr_mean": 0.03
+   },
+   "linear": 0.20954107137044609,
+   "bandit": 0.31559495426856776,
+   "diff": 0.10605388289812165,
+   "ci": [
+    0.0981644357451418,
+    0.1131705993514727
+   ]
+  },
+  {
+   "world": "Fast learners",
+   "change": {
+    "lr_mean": 0.065
+   },
+   "linear": 0.6768297663681304,
+   "bandit": 0.6479823561788074,
+   "diff": -0.02884741018932309,
+   "ci": [
+    -0.03841670655442644,
+    -0.01922325804515993
+   ]
+  },
+  {
+   "world": "Students differ more",
+   "change": {
+    "lr_sigma": 0.7
+   },
+   "linear": 0.4636502965429277,
+   "bandit": 0.4971507874885679,
+   "diff": 0.03350049094564003,
+   "ci": [
+    0.02399295328929508,
+    0.042821150304510364
+   ]
+  },
+  {
+   "world": "More guessing (4-option questions)",
+   "change": {
+    "guess": 0.25
+   },
+   "linear": 0.45430770497452094,
+   "bandit": 0.445011869373364,
+   "diff": -0.009295835601156955,
+   "ci": [
+    -0.02071533276941555,
+    0.0020230361008177463
+   ]
+  },
+  {
+   "world": "Faster forgetting",
+   "change": {
+    "forget": 0.003
+   },
+   "linear": 0.34547315830060016,
+   "bandit": 0.39544044106565124,
+   "diff": 0.049967282765051114,
+   "ci": [
+    0.039985311257374645,
+    0.06009925737401669
+   ]
+  },
+  {
+   "world": "Softer prerequisite gate",
+   "change": {
+    "prereq_gate": 3.0
+   },
+   "linear": 0.3514087690910068,
+   "bandit": 0.44283532417121724,
+   "diff": 0.09142655508021039,
+   "ci": [
+    0.08463889183774106,
+    0.09806017356659713
+   ]
+  },
+  {
+   "world": "90 questions instead of 180",
+   "change": {
+    "horizon": 90
+   },
+   "linear": 0.15168687122282318,
+   "bandit": 0.3067788987237169,
+   "diff": 0.1550920275008937,
+   "ci": [
+    0.15062784180483352,
+    0.1596817573132736
+   ]
+  },
+  {
+   "world": "120 questions instead of 180",
+   "change": {
+    "horizon": 120
+   },
+   "linear": 0.22083844472918387,
+   "bandit": 0.367726514581114,
+   "diff": 0.14688806985193015,
+   "ci": [
+    0.13813530463165735,
+    0.15475470176809925
+   ]
+  },
+  {
+   "world": "240 questions instead of 180",
+   "change": {
+    "horizon": 240
+   },
+   "linear": 0.6047377537335934,
+   "bandit": 0.5620863320520028,
+   "diff": -0.04265142168159061,
+   "ci": [
+    -0.053435117389311074,
+    -0.032161298127718695
+   ]
+  },
+  {
+   "world": "360 questions instead of 180",
+   "change": {
+    "horizon": 360
+   },
+   "linear": 0.7576252885755845,
+   "bandit": 0.6379230537058853,
+   "diff": -0.1197022348696993,
+   "ci": [
+    -0.13393223968823645,
+    -0.10556823283848683
+   ]
+  }
+ ],
+ "tuned": {
+  "Staircase": {
+   "params": {
+    "budget_factor": 2.0
+   },
+   "dev_final_mastery": 0.34291106357808004,
+   "dev_final_mastery_default": 0.3321055230217624,
+   "configs_tried": 5
+  },
+  "ThompsonTarget": {
+   "params": {
+    "target": 0.5,
+    "discount": 0.99,
+    "open_at": 0.5,
+    "close_at": 0.85
+   },
+   "dev_final_mastery": 0.31830271873484756,
+   "dev_final_mastery_default": 0.24184422024589214,
+   "configs_tried": 40
+  },
+  "LearningProgressBandit": {
+   "params": {
+    "window": 4,
+    "explore": 0.15,
+    "smooth": 0.3,
+    "open_at": 0.7,
+    "close_at": 0.75,
+    "temp": 2.0
+   },
+   "dev_final_mastery": 0.469059333061932,
+   "dev_final_mastery_default": 0.38027734715865164,
+   "configs_tried": 40
+  }
+ },
+ "world": {
+  "discrimination": 8.0,
+  "guess": 0.15,
+  "slip": 0.08,
+  "stretch": 0.1,
+  "width": 0.15,
+  "wrong_factor": 0.6,
+  "prereq_gate": 8.0,
+  "forget": 0.001,
+  "lr_mean": 0.045,
+  "lr_sigma": 0.35
+ }
+}
